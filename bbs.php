@@ -1,4 +1,6 @@
 <?php
+
+date_default_timezone_set('Asia/Manila');
   // ここにDBに登録する処理を記述する
 
 if(!empty($_POST)){
@@ -21,9 +23,33 @@ $stmt->execute($data);
 
 }
 
+$sql = 'SELECT * FROM `posts` ORDER BY created DESC';
 
+//DESK→最新の投稿から表示される。ASC 古いものから表示　
+//どちらも書かない場合はASCになる
+//created 以外にnickname とかだとアイウエオ順、年齢だと若い順とか
+
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+
+$comments = array();
+
+//while以下でデータベースに入っているデータを全て取得している。
+
+while(1){
+    $rec = $stmt->fetch(PDO::FETCH_ASSOC);
+    if($rec == false){
+        break;
+    }
+
+$comments[] = $rec;
+
+}
+
+$dbh = null;
 
 ?>
+
 
 
 
@@ -95,6 +121,9 @@ $stmt->execute($data);
       <!-- 画面右側 -->
       <div class="col-md-8 content-margin-top">
         <div class="timeline-centered">
+          <?php foreach ($comments as $comment): ?> 
+
+
           <article class="timeline-entry">
               <div class="timeline-entry-inner">
                   <div class="timeline-icon bg-success">
@@ -102,11 +131,13 @@ $stmt->execute($data);
                       <i class="fa fa-cogs"></i>
                   </div>
                   <div class="timeline-label">
-                      <h2><a href="#">seedくん</a> <span>2016-01-20</span></h2>
-                      <p>つぶやいたコメント</p>
+                      <h2><a href="#"><?php echo $comment['nickname'] ?></a> <span><?php echo $comment['created'] ?></span></h2>
+                      <p><?php echo $comment['comment']?></p>
                   </div>
               </div>
           </article>
+
+        <?php endforeach ; ?>
 
           <article class="timeline-entry begin">
               <div class="timeline-entry-inner">
